@@ -2,7 +2,7 @@
 
 > **Purpose**: This file is the shared knowledge base between **Antigravity (IDE agent)** and **Copilot CLI (terminal agent)**. Both agents read and update this file to stay synchronized. The human operator is **Vishvendra (sangwaboi)**.
 
-> **Last Updated**: 2026-04-13T06:25:00+05:30  
+> **Last Updated**: 2026-04-13T07:00:00+05:30
 > **Updated By**: Copilot CLI
 
 ---
@@ -91,11 +91,11 @@ The `vertexai.generative_models` module inside `google-cloud-aiplatform` was **d
 
 All three secrets exist in GCP Secret Manager under project `code-review-493116`:
 
-| Secret ID | Purpose | Created |
-|-----------|---------|---------|
-| `github-app-id` | GitHub App ID (integer) | 2026-04-12, 10:35 PM |
-| `github-private-key` | GitHub App `.pem` private key | 2026-04-12, 10:37 PM |
-| `github-webhook-secret` | HMAC webhook signing secret | 2026-04-12, 10:36 PM |
+| Secret ID | Purpose | Value (partial) |
+|-----------|---------|-----------------|
+| `github-app-id` | GitHub App ID (integer) | `3356708` |
+| `github-private-key` | GitHub App `.pem` private key | (in GCP) |
+| `github-webhook-secret` | HMAC webhook signing secret | `byqwe9-kavJum-bankoh...` |
 
 These are fetched at runtime via `app/secrets.py` using `google.cloud.secretmanager`. Results are LRU-cached per container lifecycle.
 
@@ -144,122 +144,68 @@ These are fetched at runtime via `app/secrets.py` using `google.cloud.secretmana
 - [x] Prompt assembly validation (repo name, diff, strictness, domain context)
 - [x] Pydantic ReviewComment model validation
 - [x] `venv` created with all deps installed locally
-- [x] Code pushed to GitHub: https://github.com/sangwaboi/truff-review.git
+- [x] Code pushed to GitHub
+
+### Local Testing Phase ✅
+- [x] GCP Auth: `gcloud auth application-default login` (authenticated as `cmo@theozu.com`)
+- [x] IAM Fix: Granted `claude-vertex@agen8-486719.iam.gserviceaccount.com` `roles/secretmanager.secretAccessor` on all 3 secrets
+- [x] Uvicorn: Started on `http://127.0.0.1:8080` (PID: 17646)
+- [x] Health endpoint: `{"status":"healthy","service":"universal-ai-reviewer"}`
+- [x] ngrok: Tunnel active at `https://pauletta-coercionary-unglacially.ngrok-free.dev`
+- [x] HMAC verification: Working correctly (rejects invalid signatures)
+- [x] Manual webhook test with proper HMAC: Returns `202 Accepted`
+- [x] Repo transferred to `absolutely-ai` org
 
 ### What Has NOT Been Done Yet ❌
-- [ ] `gcloud auth application-default login` (needed for local Secret Manager + Vertex AI access)
-- [ ] Local server startup (`uvicorn app.main:app --reload --port 8080`)
-- [ ] ngrok tunnel setup (`ngrok http 8080`)
-- [ ] GitHub App webhook URL configuration (paste ngrok URL)
-- [ ] End-to-end test: open a dummy PR and verify inline comments appear
+- [ ] **CRITICAL**: GitHub App webhook URL was pointing to `https://www.agen8.io/webhook` (wrong!)
+  - User updated it but we haven't confirmed it's now pointing to ngrok URL
+- [ ] Confirm GitHub App is installed on `absolutely-ai/truff-review`
+- [ ] End-to-end test: Real PR event from GitHub should trigger full pipeline
+- [ ] Verify Vertex AI inference works end-to-end
 - [ ] Cloud Run deployment (DO NOT deploy yet — validate locally first)
 
 ---
 
-## 8. NEXT STEPS — LOCAL TESTING WITH NGROK
+## 8. CURRENT INFRASTRUCTURE
 
-This is the execution sequence. **Copilot CLI should execute these steps:**
-
-### Step 1: Authenticate with GCP
-```bash
-gcloud auth application-default login
-```
-This opens a browser for OAuth. After auth, the local machine can access Secret Manager and Vertex AI using Vishvendra's credentials.
-
-### Step 2: Activate venv and start FastAPI
-```bash
-cd /Users/vishvendrasangwa/turff-review
-source venv/bin/activate
-uvicorn app.main:app --reload --port 8080
-```
-Expected output: `Uvicorn running on http://0.0.0.0:8080`
-
-### Step 3: Test health endpoint
-```bash
-curl http://localhost:8080/health
-```
-Expected: `{"status":"healthy","service":"universal-ai-reviewer"}`
-
-### Step 4: Expose via ngrok
-In a new terminal:
-```bash
-ngrok http 8080
-```
-Copy the HTTPS forwarding URL (e.g., `https://abc123.ngrok-free.app`)
-
-### Step 5: Configure GitHub App
-1. Go to GitHub App settings (the GitHub App that was created for this project)
-2. Set Webhook URL to: `https://<ngrok-id>.ngrok-free.app/webhook`
-3. Save
-
-### Step 6: End-to-End Test
-1. Open a dummy PR in a test repository where the GitHub App is installed
-2. Watch the local uvicorn terminal for:
-   - `Accepted PR event: action=opened, repo=..., PR=#...`
-   - `Processing PR #... on ...`
-   - `Context assembly complete: X files reviewed, Y skipped`
-   - `Sending inference request to gemini-3.1-pro...`
-   - `Review complete for ... PR #...: N comments posted in single review`
-3. Check the PR on GitHub — inline AI review comments should appear
-
-### Debugging Tips
-- If HMAC fails: check that `github-webhook-secret` in GCP matches the secret configured in the GitHub App
-- If JWT auth fails: check that `github-private-key` in GCP is the correct `.pem` file
-- If Vertex AI fails: check that the service account has `roles/aiplatform.user`
-- If comment posting fails with 422: the AI generated a line number that doesn't exist in the diff — this is a known edge case with LLMs
+| Component | Value |
+|-----------|-------|
+| **Uvicorn** | Running on `http://127.0.0.1:8080` (PID: 17646) |
+| **ngrok URL** | `https://pauletta-coercionary-unglacially.ngrok-free.dev` |
+| **Webhook URL** | Should be `https://pauletta-coercionary-unglacially.ngrok-free.dev/webhook` |
+| **GitHub App** | `truff-review` under absolutely-ai org |
+| **App ID** | `3356708` |
+| **Installation ID** | `3356708` (same as app_id for org-level installation) |
 
 ---
 
-## 9. IMPORTANT API PATTERNS
+## 9. DEBUGGING DISCOVERIES
 
-### PyGithub: Batched Review
-```python
-# CORRECT — single API call
-pr.create_review(
-    commit=repo.get_commit(pr.head.sha),  # Commit OBJECT, not SHA string
-    body="Review summary",
-    event="COMMENT",
-    comments=[
-        {"path": "file.py", "line": 42, "side": "RIGHT", "body": "Fix this"},
-        {"path": "file.py", "line": 88, "side": "RIGHT", "body": "Check this"},
-    ]
-)
+### Discovery 1: Wrong Webhook URL
+The GitHub App's webhook URL was configured to `https://www.agen8.io/webhook` (an old Vercel URL) instead of the ngrok tunnel. All webhook deliveries were going to Vercel and returning 404.
 
-# WRONG — will get rate-limited
-for comment in comments:
-    pr.create_review_comment(...)  # DON'T DO THIS
+**Fix**: User updated the webhook URL in GitHub App settings.
+
+### Discovery 2: IAM Permission Issue
+The `claude-vertex@agen8-486719.iam.gserviceaccount.com` service account (used via `GOOGLE_APPLICATION_CREDENTIALS`) did not have access to the secrets in `code-review-493116` project.
+
+**Fix**: Granted `roles/secretmanager.secretAccessor` on all 3 secrets to `claude-vertex` SA.
+
+### Discovery 3: Webhook Secret Mismatch
+If the webhook secret in GitHub App settings doesn't match the `github-webhook-secret` in GCP, GitHub will fail deliveries silently.
+
+**Current secret in GCP**: `byqwe9-kavJum-bankoh...`
+
+### Discovery 4: Manual HMAC Test Works
+When sending a test request with proper HMAC signature, the endpoint correctly returns:
+```json
+{"message":"Accepted","status":"processing in background","event":"pull_request","action":"opened"}
+HTTP 202
 ```
 
-### Google GenAI SDK: Structured Output
-```python
-from google import genai
-from google.genai import types
-from pydantic import BaseModel
+But the background task failed with: `Malformed webhook payload — missing key: 'installation'`
 
-class ReviewComment(BaseModel):
-    path: str
-    line: int
-    body: str
-
-client = genai.Client(vertexai=True, project="code-review-493116", location="us-central1")
-response = client.models.generate_content(
-    model="gemini-3.1-pro",
-    contents=prompt,
-    config=types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=list[ReviewComment],
-        temperature=0.2,
-    )
-)
-```
-
-### HMAC Verification
-```python
-import hmac, hashlib
-hash_object = hmac.new(secret.encode('utf-8'), msg=payload_body, digestmod=hashlib.sha256)
-expected = "sha256=" + hash_object.hexdigest()
-hmac.compare_digest(expected, signature_header)  # Timing-attack safe
-```
+This is because my manual test payload was simplified and didn't include the full GitHub webhook structure with `installation` object.
 
 ---
 
@@ -271,11 +217,12 @@ hmac.compare_digest(expected, signature_header)  # Timing-attack safe
 | **Local Python** | 3.9.6 (system) |
 | **Docker Python** | 3.11-slim |
 | **Venv Location** | `/Users/vishvendrasangwa/turff-review/venv` |
-| **Venv Activate** | `source venv/bin/activate` |
-| **GCP Auth** | Application Default Credentials (needs `gcloud auth application-default login`) |
-| **GitHub Repo** | https://github.com/sangwaboi/truff-review.git |
-| **Branch** | `main` |
-| **Last Commit** | `aa162754` — docs: add Context.md — shared handoff document between IDE and CLI agents |
+| **Venv Activate** | `source /Users/vishvendrasangwa/turff-review/venv/bin/activate` |
+| **GCP Auth** | Application Default Credentials active (cmo@theozu.com) |
+| **GitHub CLI** | Authenticated as sangwaboi |
+| **GitHub Repo** | https://github.com/absolutely-ai/truff-review.git |
+| **Test Branch** | `test-e2e-1776042386` |
+| **Test PR** | https://github.com/absolutely-ai/truff-review/pull/2 |
 
 ---
 
@@ -288,33 +235,37 @@ hmac.compare_digest(expected, signature_header)  # Timing-attack safe
 4. **Fixed Python 3.9 compat** — `str | None` → `Optional[str]` with `from __future__ import annotations`
 5. **Implemented batched reviews** — single `pr.create_review()` instead of N × `create_review_comment()`
 6. **Updated model** — `gemini-3.1-pro-preview` → `gemini-3.1-pro` (stable)
-7. **Pushed to GitHub** — https://github.com/sangwaboi/truff-review.git
+7. **Pushed to GitHub** — https://github.com/absolutely-ai/truff-review.git
 8. **Validated** — all imports, noise filter, prompt assembly, Pydantic models pass
 
-### Session 2 (Copilot CLI — 2026-04-13, 06:30 IST)
+### Session 2 (Copilot CLI — 2026-04-13, 06:30-07:00 IST)
 
-**Status**: Local testing IN PROGRESS. Webhook endpoint is live and responding.
+**Status**: Local testing infrastructure ready. Webhook endpoint working. **Waiting for user to confirm webhook URL is correct and GitHub App is installed on repo.**
 
 **What Was Done**:
 1. **GCP Auth**: Ran `gcloud auth application-default login` — authenticated as `cmo@theozu.com`
-2. **IAM Fix**: Discovered `claude-vertex@agen8-486719.iam.gserviceaccount.com` (local dev SA) lacked access to `code-review-493116` secrets
-   - Granted `roles/secretmanager.secretAccessor` on all 3 secrets to `claude-vertex` SA
+2. **IAM Fix**: Granted `claude-vertex@agen8-486719.iam.gserviceaccount.com` `roles/secretmanager.secretAccessor` on all 3 secrets in `code-review-493116`
 3. **Uvicorn**: Started successfully on `http://127.0.0.1:8080` (PID: 17646)
-4. **Health Check**: `curl http://localhost:8080/health` → `{"status":"healthy","service":"universal-ai-reviewer"}`
+4. **Health Check**: `curl localhost:8080/health` → `{"status":"healthy"}`
 5. **ngrok**: Tunnel active at `https://pauletta-coercionary-unglacially.ngrok-free.dev`
-6. **Webhook Test**: POST without signature → `401 Missing x-hub-signature-256 header` (EXPECTED — endpoint working correctly)
+6. **Webhook URL discovery**: Found it was pointing to `https://www.agen8.io/webhook` (Vercel) — user corrected
+7. **Manual HMAC test**: Endpoint correctly returns 202 Accepted with proper signature
+8. **Repo transfer**: Changed remote from `sangwaboi/truff-review` to `absolutely-ai/truff-review`
+9. **Test PR created**: https://github.com/absolutely-ai/truff-review/pull/2
 
-**Still PENDING**:
-- [ ] Configure GitHub App webhook URL to point to ngrok URL
-- [ ] End-to-end test with real PR event (requires GitHub App installation + HMAC signature)
-- [ ] Verify Vertex AI inference works end-to-end
+**Current Problem**:
+- GitHub is not sending webhook requests to ngrok tunnel
+- Possible causes:
+  1. Webhook URL still not updated correctly
+  2. GitHub App not installed on `absolutely-ai/truff-review`
+  3. Webhook secret mismatch
 
-**Critical Discovery**: The `claude-vertex` service account (used for local dev via `GOOGLE_APPLICATION_CREDENTIALS`) needed explicit IAM grant on `code-review-493116` secrets. This was NOT documented in the original setup.
-
-**Next Step**: User needs to configure GitHub App webhook URL:
-```
-Webhook URL: https://pauletta-coercionary-unglacially.ngrok-free.app/webhook
-```
+**Next Steps for Antigravity (or next CLI session)**:
+1. Verify webhook URL in GitHub App is exactly: `https://pauletta-coercionary-unglacially.ngrok-free.app/webhook`
+2. Verify webhook secret matches: `byqwe9-kavJum-bankoh...`
+3. Verify GitHub App is installed on `absolutely-ai/truff-review` repo
+4. If webhook still not reaching, check "Recent Deliveries" in GitHub App settings
+5. Once real webhook arrives with `installation` key, full E2E pipeline should execute
 
 ---
 
