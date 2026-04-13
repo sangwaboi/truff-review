@@ -24,6 +24,10 @@ GitHub Webhook (PR opened/synced)
 └─────────────────────────┘
 ```
 
+## Test PR
+
+Created: 2026-04-13 — Testing webhook E2E flow
+
 ## Project Structure
 
 ```
