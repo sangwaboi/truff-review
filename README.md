@@ -24,6 +24,8 @@ GitHub Webhook (PR opened/synced)
 └─────────────────────────┘
 ```
 
+## Test PR (local E2E)
+
 ## Project Structure
 
 ```
