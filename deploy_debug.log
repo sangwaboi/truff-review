@@ -1,0 +1,337 @@
+DEBUG: Running [gcloud.run.deploy] with arguments: [--no-cpu-throttling: "False", --region: "us-central1", --source: ".", --verbosity: "debug", SERVICE: "universal-ai-reviewer"]
+DEBUG: On GCE from memory cache: False
+DEBUG: On GCE from memory cache: False
+DEBUG: Starting new HTTPS connection (1): serviceusage.googleapis.com:443
+DEBUG: https://serviceusage.googleapis.com:443 "GET /v1/projects/code-review-493116/services/artifactregistry.googleapis.com?alt=json HTTP/1.1" 200 None
+DEBUG: On GCE from memory cache: False
+DEBUG: On GCE from memory cache: False
+DEBUG: Starting new HTTPS connection (1): serviceusage.googleapis.com:443
+DEBUG: https://serviceusage.googleapis.com:443 "GET /v1/projects/code-review-493116/services/cloudbuild.googleapis.com?alt=json HTTP/1.1" 200 None
+DEBUG: On GCE from memory cache: False
+DEBUG: On GCE from memory cache: False
+DEBUG: Starting new HTTPS connection (1): serviceusage.googleapis.com:443
+DEBUG: https://serviceusage.googleapis.com:443 "GET /v1/projects/code-review-493116/services/run.googleapis.com?alt=json HTTP/1.1" 200 None
+DEBUG: On GCE from memory cache: False
+DEBUG: On GCE from memory cache: False
+DEBUG: On GCE from memory cache: False
+DEBUG: Starting new HTTPS connection (1): us-central1-run.googleapis.com:443
+DEBUG: https://us-central1-run.googleapis.com:443 "GET /apis/serving.knative.dev/v1/namespaces/code-review-493116/services/universal-ai-reviewer?alt=json HTTP/1.1" 200 None
+DEBUG: source_location: None
+DEBUG: Existing source_bucket: None
+DEBUG: On GCE from memory cache: False
+DEBUG: Starting new HTTPS connection (1): artifactregistry.googleapis.com:443
+DEBUG: https://artifactregistry.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/repositories/cloud-run-source-deploy?alt=json HTTP/1.1" 200 None
+DEBUG: On GCE from memory cache: False
+DEBUG: Starting new HTTPS connection (1): cloudbuild.googleapis.com:443
+DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/defaultServiceAccount?alt=json HTTP/1.1" 200 None
+DEBUG: On GCE from memory cache: False
+DEBUG: Starting new HTTPS connection (1): iam.googleapis.com:443
+DEBUG: https://iam.googleapis.com:443 "GET /v1/projects/-/serviceAccounts/944575899427-compute@developer.gserviceaccount.com?alt=json HTTP/1.1" 200 None
+Building using Dockerfile and deploying container to Cloud Run service [universal-ai-reviewer] in project [code-review-493116] region [us-central1]
+Building and deploying...
+Validating configuration....................DEBUG: https://us-central1-run.googleapis.com:443 "PUT /apis/serving.knative.dev/v1/namespaces/code-review-493116/services/universal-ai-reviewer?alt=json&dryRun=all HTTP/1.1" 200 None
+done
+Uploading sources....DEBUG: On GCE from memory cache: False
+DEBUG: Creating bucket run-sources-code-review-493116-us-central1 in region us-central1
+DEBUG: Starting new HTTPS connection (1): storage.googleapis.com:443
+....DEBUG: https://storage.googleapis.com:443 "GET /storage/v1/b/run-sources-code-review-493116-us-central1?alt=json HTTP/1.1" 200 1279
+.......DEBUG: https://storage.googleapis.com:443 "GET /storage/v1/b?alt=json&maxResults=1000&prefix=run-sources-code-review-493116-us-central1&project=code-review-493116 HTTP/1.1" 200 1521
+DEBUG: Uploading source to gs://run-sources-code-review-493116-us-central1/services/universal-ai-reviewer/1776053510.215518-8f01a202af5c4c8cb835b3b988451fbf.zip
+INFO: Using default gcloudignore file:
+--------------------------------------------------
+# This file specifies files that are *not* uploaded to Google Cloud
+# using gcloud. It follows the same syntax as .gitignore, with the addition of
+# "#!include" directives (which insert the entries of the given .gitignore-style
+# file at that point).
+#
+# For more information, run:
+#   $ gcloud topic gcloudignore
+#
+.gcloudignore
+# If you would like to upload your .git directory, .gitignore file or files
+# from your .gitignore file, remove the corresponding line
+# below:
+.git
+.gitignore
+#!include:.gitignore
+
+--------------------------------------------------
+DEBUG: Skipping file [.gitignore]
+DEBUG: Skipping file [venv]
+DEBUG: Skipping file [.git]
+INFO: Uploading [/var/folders/4g/tq2tgsms0x72365w0bb67_d40000gn/T/tmpqpog4k8o/file.zip] to [run-sources-code-review-493116-us-central1/services/universal-ai-reviewer/1776053510.215518-8f01a202af5c4c8cb835b3b988451fbf.zip]
+......DEBUG: https://storage.googleapis.com:443 "POST /upload/storage/v1/b/run-sources-code-review-493116-us-central1/o?alt=json&name=services%2Funiversal-ai-reviewer%2F1776053510.215518-8f01a202af5c4c8cb835b3b988451fbf.zip&uploadType=multipart HTTP/1.1" 200 1212
+done
+DEBUG: On GCE from memory cache: False
+DEBUG: Starting new HTTPS connection (1): us-central1-run.googleapis.com:443
+DEBUG: https://us-central1-run.googleapis.com:443 "POST /v2/projects/code-review-493116/locations/us-central1/builds:submit?alt=json HTTP/1.1" 200 None
+Building Container.....DEBUG: On GCE from memory cache: False
+DEBUG: Starting new HTTPS connection (1): cloudbuild.googleapis.com:443
+...............DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+........................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+........................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.........................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+..........................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+........................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.............DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+........................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+........................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+............DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.............DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+............DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+........................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+............DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+..............DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+...........................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+..........................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+..................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+...........................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+.......................DEBUG: https://cloudbuild.googleapis.com:443 "GET /v1/projects/code-review-493116/locations/us-central1/operations/902d74cb-bd53-4950-84d0-e4be67ff76ff?alt=json HTTP/1.1" 200 None
+failed
+Deployment failed
+DEBUG: (gcloud.run.deploy) Build failed; check build logs for details
+Traceback (most recent call last):
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/command_lib/run/sourcedeploys/deployer.py", line 490, in _PollUntilBuildCompletes
+    operation = waiter.PollUntilDone(
+        poller,
+    ...<5 lines>...
+        max_wait_ms=60000,
+    )
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/api_lib/util/waiter.py", line 319, in PollUntilDone
+    operation = retryer.RetryOnResult(
+        func=poller.Poll,
+        args=(operation_ref,),
+        should_retry_if=_IsNotDone,
+        sleep_ms=sleep_ms)
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/core/util/retry.py", line 256, in RetryOnResult
+    self._RaiseIfStop(result, state)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/core/util/retry.py", line 118, in _RaiseIfStop
+    raise WaitException('Timeout', result, state)
+googlecloudsdk.core.util.retry.WaitException: last_result=<Operation
+ metadata: <MetadataValue
+ additionalProperties: [<AdditionalProperty
+ key: '@type'
+ value: <JsonValue
+ string_value: 'type.googleapis.com/google.devtools.cloudbuild.v1.BuildOperationMetadata'>>, <AdditionalProperty
+ key: 'build'
+ value: <JsonValue
+ object_value: <JsonObject
+ properties: [<Property
+ key: 'id'
+ value: <JsonValue
+ string_value: '902d74cb-bd53-4950-84d0-e4be67ff76ff'>>, <Property
+ key: 'status'
+ value: <JsonValue
+ string_value: 'WORKING'>>, <Property
+ key: 'source'
+ value: <JsonValue
+ object_value: <JsonObject
+ properties: [<Property
+ key: 'storageSource'
+ value: <JsonValue
+ object_value: <JsonObject
+ properties: [<Property
+ key: 'bucket'
+ value: <JsonValue
+ string_value: 'run-sources-code-review-493116-us-central1'>>, <Property
+ key: 'object'
+ value: <JsonValue
+ string_value: 'services/universal-ai-reviewer/1776053510.215518-8f01a202af5c4c8cb835b3b988451fbf.zip'>>, <Property
+ key: 'generation'
+ value: <JsonValue
+ string_value: '1776053510734879'>>]>>>]>>>, <Property
+ key: 'createTime'
+ value: <JsonValue
+ string_value: '2026-04-13T04:11:52.483563716Z'>>, <Property
+ key: 'startTime'
+ value: <JsonValue
+ string_value: '2026-04-13T04:11:52.993142451Z'>>, <Property
+ key: 'steps'
+ value: <JsonValue
+ array_value: <JsonArray
+ entries: [<JsonValue
+ object_value: <JsonObject
+ properties: [<Property
+ key: 'name'
+ value: <JsonValue
+ string_value: 'gcr.io/cloud-builders/docker'>>, <Property
+ key: 'args'
+ value: <JsonValue
+ array_value: <JsonArray
+ entries: [<JsonValue
+ string_value: 'build'>, <JsonValue
+ string_value: '--network'>, <JsonValue
+ string_value: 'cloudbuild'>, <JsonValue
+ string_value: '--no-cache'>, <JsonValue
+ string_value: '-t'>, <JsonValue
+ string_value: 'us-central1-docker.pkg.dev/code-review-493116/cloud-run-source-deploy/universal-ai-reviewer:latest'>, <JsonValue
+ string_value: '.'>, <JsonValue
+ string_value: '--label'>, <JsonValue
+ string_value: 'google.build_id=902d74cb-bd53-4950-84d0-e4be67ff76ff'>, <JsonValue
+ string_value: '--label'>, <JsonValue
+ string_value: 'google.source=gs://run-sources-code-review-493116-us-central1/services/universal-ai-reviewer/1776053510.215518-8f01a202af5c4c8cb835b3b988451fbf.zip#1776053510734879'>]>>>, <Property
+ key: 'id'
+ value: <JsonValue
+ string_value: 'run-docker-build'>>]>>]>>>, <Property
+ key: 'timeout'
+ value: <JsonValue
+ string_value: '1800s'>>, <Property
+ key: 'images'
+ value: <JsonValue
+ array_value: <JsonArray
+ entries: [<JsonValue
+ string_value: 'us-central1-docker.pkg.dev/code-review-493116/cloud-run-source-deploy/universal-ai-reviewer:latest'>]>>>, <Property
+ key: 'projectId'
+ value: <JsonValue
+ string_value: 'code-review-493116'>>, <Property
+ key: 'sourceProvenance'
+ value: <JsonValue
+ object_value: <JsonObject
+ properties: [<Property
+ key: 'resolvedStorageSource'
+ value: <JsonValue
+ object_value: <JsonObject
+ properties: [<Property
+ key: 'bucket'
+ value: <JsonValue
+ string_value: 'run-sources-code-review-493116-us-central1'>>, <Property
+ key: 'object'
+ value: <JsonValue
+ string_value: 'services/universal-ai-reviewer/1776053510.215518-8f01a202af5c4c8cb835b3b988451fbf.zip'>>, <Property
+ key: 'generation'
+ value: <JsonValue
+ string_value: '1776053510734879'>>]>>>]>>>, <Property
+ key: 'options'
+ value: <JsonValue
+ object_value: <JsonObject
+ properties: [<Property
+ key: 'logStreamingOption'
+ value: <JsonValue
+ string_value: 'STREAM_OFF'>>, <Property
+ key: 'logging'
+ value: <JsonValue
+ string_value: 'CLOUD_LOGGING_ONLY'>>, <Property
+ key: 'pool'
+ value: <JsonValue
+ object_value: <JsonObject
+ properties: []>>>]>>>, <Property
+ key: 'logUrl'
+ value: <JsonValue
+ string_value: 'https://console.cloud.google.com/cloud-build/builds;region=us-central1/902d74cb-bd53-4950-84d0-e4be67ff76ff?project=944575899427'>>, <Property
+ key: 'tags'
+ value: <JsonValue
+ array_value: <JsonArray
+ entries: [<JsonValue
+ string_value: 'p-run'>, <JsonValue
+ string_value: 'r-docker'>, <JsonValue
+ string_value: 'bt-DOCKER'>, <JsonValue
+ string_value: 'service_universal-ai-reviewer'>]>>>, <Property
+ key: 'artifacts'
+ value: <JsonValue
+ object_value: <JsonObject
+ properties: [<Property
+ key: 'images'
+ value: <JsonValue
+ array_value: <JsonArray
+ entries: [<JsonValue
+ string_value: 'us-central1-docker.pkg.dev/code-review-493116/cloud-run-source-deploy/universal-ai-reviewer:latest'>]>>>]>>>, <Property
+ key: 'queueTtl'
+ value: <JsonValue
+ string_value: '360s'>>, <Property
+ key: 'serviceAccount'
+ value: <JsonValue
+ string_value: 'projects/code-review-493116/serviceAccounts/944575899427-compute@developer.gserviceaccount.com'>>, <Property
+ key: 'name'
+ value: <JsonValue
+ string_value: 'projects/944575899427/locations/us-central1/builds/902d74cb-bd53-4950-84d0-e4be67ff76ff'>>, <Property
+ key: 'warnings'
+ value: <JsonValue
+ array_value: <JsonArray
+ entries: [<JsonValue
+ object_value: <JsonObject
+ properties: [<Property
+ key: 'text'
+ value: <JsonValue
+ string_value: 'The service account running this build projects/code-review-493116/serviceAccounts/944575899427-compute@developer.gserviceaccount.com does not have permission to write logs to Cloud Logging. To fix this, grant the Logs Writer (roles/logging.logWriter) role to the service account.'>>, <Property
+ key: 'priority'
+ value: <JsonValue
+ string_value: 'INFO'>>]>>]>>>]>>>]>
+ name: 'operations/build/code-review-493116/OTAyZDc0Y2ItYmQ1My00OTUwLTg0ZDAtZTRiZTY3ZmY3NmZm'>, last_retrial=26, time_passed_ms=60264,time_to_wait=1000
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/calliope/cli.py", line 944, in Execute
+    resources = calliope_command.Run(cli=self, args=args)
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/calliope/backend.py", line 960, in Run
+    resources = command_instance.Run(args)
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/surface/run/deploy.py", line 1030, in Run
+    service = _ReleaseService(changes)
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/surface/run/deploy.py", line 993, in _ReleaseService
+    return operations.ReleaseService(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        service_ref,
+        ^^^^^^^^^^^^
+    ...<31 lines>...
+        skip_build=skip_build,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/command_lib/run/serverless_operations.py", line 969, in ReleaseService
+    ) = deployer.CreateImage(
+        ~~~~~~~~~~~~~~~~~~~~^
+        tracker,
+        ^^^^^^^^
+    ...<16 lines>...
+        kms_key,
+        ^^^^^^^^
+    )
+    ^
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/command_lib/run/sourcedeploys/deployer.py", line 105, in CreateImage
+    response_dict, build_log_url, base_image_from_build = _SubmitBuild(
+                                                          ~~~~~~~~~~~~^
+        tracker,
+        ^^^^^^^^
+        submit_build_request,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/command_lib/run/sourcedeploys/deployer.py", line 465, in _SubmitBuild
+    response_dict = _PollUntilBuildCompletes(build_op_ref)
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/command_lib/run/sourcedeploys/deployer.py", line 501, in _PollUntilBuildCompletes
+    operation = waiter.PollUntilDone(
+        poller,
+    ...<4 lines>...
+        wait_ceiling_ms=10000,
+    )
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/api_lib/util/waiter.py", line 319, in PollUntilDone
+    operation = retryer.RetryOnResult(
+        func=poller.Poll,
+        args=(operation_ref,),
+        should_retry_if=_IsNotDone,
+        sleep_ms=sleep_ms)
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/core/util/retry.py", line 249, in RetryOnResult
+    if not should_retry(result, state):
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/api_lib/util/waiter.py", line 317, in _IsNotDone
+    return not poller.IsDone(operation)
+               ~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/vishvendrasangwa/Downloads/google-cloud-sdk/lib/googlecloudsdk/api_lib/util/waiter.py", line 119, in IsDone
+    raise OperationError(operation.error.message)
+googlecloudsdk.api_lib.util.waiter.OperationError: Build failed; check build logs for details
+ERROR: (gcloud.run.deploy) Build failed; check build logs for details

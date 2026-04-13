@@ -314,3 +314,19 @@ GitHub webhook "Redeliver" replays the delivery to the URL that was configured *
 5. **After making changes**: run `source venv/bin/activate && python3 -c "from app.main import app; print('OK')"` to validate imports
 6. **After any code change**: commit and push to `origin main`
 7. **Update this Context.md** after significant actions so the other agent can pick up context
+### Session 4 (Antigravity — 2026-04-13, 09:20 IST)
+**Status**: Cloud Run deployed and responding. Diagnosed and fixed IAM Permissions.
+**Findings**: Added allUsers run.invoker for Webhook. Cloud Run service accounts lacked proper AI Platform roles (`roles/aiplatform.user`) causing Vertex AI inference to silently fail. 
+
+### Session 5 (Antigravity — 2026-04-13, 09:50 IST)
+**Status**: Identified why the deployed reviewer is not posting comments.
+**Findings**: 
+1. Re-deployed `universal-ai-reviewer:v6` with the correct model (`gemini-2.5-flash`), `--no-cpu-throttling`, and proper IAM roles.
+2. Verified that Vertex AI inference completed successfully. 
+3. Tested `pr.create_review()` locally and verified that the **GitHub App lacks Pull Request Write permissions** (`403 Forbidden`). 
+
+**Action Required from User**:
+1. Go to your **GitHub Developer Settings** -> **GitHub Apps** -> Edit `universal-reviewer`.
+2. Under **Permissions & events** -> **Repository permissions** -> **Pull requests**, change `Read-only` to **`Read and write`**.
+3. Save changes. Then Accept the New Permission via the Banner/Settings.
+4. Once completed, the AI will successfully comment on PRs.

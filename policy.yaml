@@ -1,0 +1,4 @@
+name: projects/code-review-493116/policies/iam.allowedPolicyMemberDomains
+spec:
+  rules:
+  - allowAll: true

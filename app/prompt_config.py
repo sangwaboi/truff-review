@@ -28,7 +28,7 @@ class ReviewStrictness(str, Enum):
 # ---------------------------------------------------------------------------
 # Active Configuration — Change this to adjust review behavior
 # ---------------------------------------------------------------------------
-ACTIVE_STRICTNESS = ReviewStrictness.MODERATE
+ACTIVE_STRICTNESS = ReviewStrictness.STRICT
 
 # ---------------------------------------------------------------------------
 # System Prompts by Strictness Level
@@ -115,3 +115,44 @@ THE PULL REQUEST DIFF (Focus your review ONLY on added lines marked with '+'):
 {diff}
 
 Analyze the diff and return your review as a JSON array. Each element must have exactly three fields: "path" (string — the file path), "line" (integer — the line number in the new file), and "body" (string — your review comment). If no issues are found, return an empty array []."""
+
+
+def build_deep_prompt(repo_name: str, diff: str, context: str, flash_comments: list[dict]) -> str:
+    """
+    Assemble the prompt for the heavyweight Deep Analysis model.
+    """
+    flash_json = ""
+    import json
+    if flash_comments:
+        flash_json = json.dumps(flash_comments, indent=2)
+    else:
+        flash_json = "No immediate tactical issues found by the junior model."
+
+    system_prompt = """You are a Principal Software Architect conducting an elite deep-dive code review.
+A junior fast-pass model has just completed a surface-level review of the pull request. Your job is NOT to repeat the junior model's findings, and NOT to flag trivial style issues.
+
+YOUR GOAL:
+Read the junior model's findings, the pull request diff, and the full file context. You must identify deeply hidden systemic failures, root causes, massive security vulnerabilities, or high-level architectural anti-patterns that the junior model missed or only saw the surface of.
+
+RULES:
+- ONLY comment on lines that were ADDED (lines starting with '+' in the diff).
+- ONLY return a JSON array containing objects with: "path", "line", and "body".
+- If the PR is perfectly architected and there are no deep root causes, return an empty array [].
+- DO NOT post generic praise. Return [] if there is nothing critical to say."""
+
+    return f"""{system_prompt}
+
+---
+
+REPOSITORY: {repo_name}
+
+JUNIOR MODEL FINDINGS (Surface Level):
+{flash_json}
+
+FULL CONTEXT OF MODIFIED FILES:
+{context}
+
+THE PULL REQUEST DIFF:
+{diff}
+
+Analyze the architecture and return your deep-dive review as a JSON array."""

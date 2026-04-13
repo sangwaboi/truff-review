@@ -16,12 +16,12 @@ from github import GithubException
 
 from app.github_auth import get_github_client
 from app.context import assemble_context
-from app.inference import execute_review
+from app.inference import execute_deep_analysis, execute_review
 
 logger = logging.getLogger(__name__)
 
 
-def process_pull_request(payload: dict) -> None:
+def process_pull_request(repo_name: str, pr_number: int, installation_id: int) -> None:
     """
     Process a Pull Request webhook payload end-to-end.
 
@@ -37,24 +37,13 @@ def process_pull_request(payload: dict) -> None:
     the background task doesn't crash silently.
 
     Args:
-        payload: The raw webhook payload dict from GitHub.
+        repo_name: The full repository name (e.g., "org/repo")
+        pr_number: The pull request number
+        installation_id: The GitHub App installation ID
     """
-    # -----------------------------------------------------------------------
-    # 1. Extract PR metadata
-    # -----------------------------------------------------------------------
-    try:
-        repo_name = payload["repository"]["full_name"]
-        pr_number = payload["pull_request"]["number"]
-        installation_id = payload["installation"]["id"]
-        pr_title = payload["pull_request"].get("title", "Untitled PR")
-    except KeyError as exc:
-        logger.error("Malformed webhook payload — missing key: %s", exc)
-        return
-
     logger.info(
-        "Processing PR #%d (%s) on %s [installation: %d]",
+        "Processing PR #%d on %s [installation: %d]",
         pr_number,
-        pr_title,
         repo_name,
         installation_id,
     )
@@ -160,7 +149,7 @@ def process_pull_request(payload: dict) -> None:
                 f"🤖 **AI Code Review** — {len(review_comments)} "
                 f"issue{'s' if len(review_comments) != 1 else ''} found.\n\n"
                 f"_Reviewed by Universal AI Reviewer (Gemini) · "
-                f"Strictness: MODERATE_"
+                f"Strictness: STRICT_"
             ),
             event="COMMENT",
             comments=review_comments,
@@ -187,3 +176,51 @@ def process_pull_request(payload: dict) -> None:
             pr_number,
             exc,
         )
+
+    # -----------------------------------------------------------------------
+    # 7. Orchestrate Pass 2: Heavy Model (Deep Analysis)
+    # -----------------------------------------------------------------------
+    logger.info("Initiating Phase 2: Deep Analysis for %s PR #%d", repo_name, pr_number)
+    
+    # Serialize the first-pass comments
+    flash_comments_data = [{"path": c.path, "line": c.line, "body": c.body} for c in comments]
+
+    try:
+        deep_comments = execute_deep_analysis(repo_name, diff_text, full_files_context, flash_comments_data)
+    except Exception as exc:
+        logger.error("Vertex AI Deep inference failed for %s PR #%d: %s", repo_name, pr_number, exc)
+        return
+
+    if not deep_comments:
+        logger.info("AI Deep Analysis found no underlying root causes in PR #%d on %s.", pr_number, repo_name)
+        return
+
+    # Post Pass 2 Review
+    deep_review_comments = []
+    for comment in deep_comments:
+        deep_review_comments.append({
+            "path": comment.path,
+            "line": comment.line,
+            "side": "RIGHT",
+            "body": f"🧠 **Deep Analysis (gemini-2.5-pro)**: \n\n{comment.body}",
+        })
+
+    try:
+        pr.create_review(
+            commit=commit_obj,
+            body=(
+                f"🧠 **Principal Architect Code Review** — {len(deep_review_comments)} "
+                f"deep root-cause issue{'s' if len(deep_review_comments) != 1 else ''} found.\n\n"
+                f"_Reviewed by Universal AI Reviewer (Gemini Pro) · Strictly Analyzing architecture_"
+            ),
+            event="COMMENT",
+            comments=deep_review_comments,
+        )
+        logger.info(
+            "Deep Review complete for %s PR #%d: %d deep comments posted",
+            repo_name,
+            pr_number,
+            len(deep_review_comments),
+        )
+    except Exception as exc:
+        logger.error("Failed to post Deep review for %s PR #%d: %s", repo_name, pr_number, exc)

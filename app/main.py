@@ -46,7 +46,7 @@ app = FastAPI(
 )
 
 # Accepted PR actions that trigger a review
-REVIEWABLE_ACTIONS = {"opened", "synchronize"}
+REVIEWABLE_ACTIONS = {"opened", "synchronize", "reopened"}
 
 
 # ---------------------------------------------------------------------------
@@ -112,18 +112,34 @@ async def github_webhook(
     # 4. Parse the JSON payload
     payload = await request.json()
 
-    # 5. Event routing — only process PR open/sync events
+    # 5. Extract core identifiers natively if available
     action = payload.get("action", "")
+    repo_name = payload.get("repository", {}).get("full_name", "unknown")
+    installation_id = payload.get("installation", {}).get("id")
+
+    # Flag indicating whether this payload triggers a review
+    should_review = False
+    pr_number = None
 
     if x_github_event == "pull_request" and action in REVIEWABLE_ACTIONS:
-        logger.info(
-            "Accepted PR event: action=%s, repo=%s, PR=#%s",
-            action,
-            payload.get("repository", {}).get("full_name", "unknown"),
-            payload.get("pull_request", {}).get("number", "?"),
-        )
+        pr_number = payload.get("pull_request", {}).get("number")
+        if pr_number:
+            should_review = True
+            logger.info("Accepted PR event: action=%s, repo=%s, PR=#%d", action, repo_name, pr_number)
+            
+    elif x_github_event == "issue_comment" and action == "created":
+        # Ensure it's a comment on a Pull Request (issue object contains pull_request mapping)
+        if "pull_request" in payload.get("issue", {}):
+            comment_body = payload.get("comment", {}).get("body", "").lower()
+            if "@universal-reviewer" in comment_body or "@truff-review" in comment_body:
+                pr_number = payload.get("issue", {}).get("number")
+                if pr_number:
+                    should_review = True
+                    logger.info("Accepted @mention on issue_comment: action=%s, repo=%s, PR=#%d", action, repo_name, pr_number)
+
+    if should_review and pr_number and installation_id:
         # 6. Offload to background task — this is the timeout bypass
-        background_tasks.add_task(process_pull_request, payload)
+        background_tasks.add_task(process_pull_request, repo_name, pr_number, installation_id)
 
         return {
             "message": "Accepted",

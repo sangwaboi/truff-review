@@ -112,3 +112,54 @@ def execute_review(
     )
 
     return comments
+
+# ---------------------------------------------------------------------------
+# Deep Analysis Inference Execution (Pass 2)
+# ---------------------------------------------------------------------------
+PRO_MODEL_ID = "gemini-2.5-pro"
+
+def execute_deep_analysis(
+    repo_name: str,
+    diff: str,
+    context: str,
+    flash_comments: list[dict],
+) -> list[ReviewComment]:
+    """
+    Send the PR context and initial findings to the heavyweight Pro model.
+    """
+    from app.prompt_config import build_deep_prompt
+    client = genai.Client(
+        vertexai=True,
+        project=GCP_PROJECT_ID,
+        location=GCP_LOCATION,
+    )
+
+    prompt = build_deep_prompt(repo_name, diff, context, flash_comments)
+
+    logger.info(
+        "Sending deep analysis request to %s for repo: %s", PRO_MODEL_ID, repo_name
+    )
+
+    response = client.models.generate_content(
+        model=PRO_MODEL_ID,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=list[ReviewComment],
+            temperature=0.2,
+        ),
+    )
+
+    raw_output = response.text
+    logger.debug("Raw deep analysis output: %s", raw_output[:500])
+
+    parsed = json.loads(raw_output)
+    comments = [ReviewComment(**item) for item in parsed]
+
+    logger.info(
+        "Deep Analysis complete for %s: %d critical issues generated",
+        repo_name,
+        len(comments),
+    )
+
+    return comments
