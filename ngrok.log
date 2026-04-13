@@ -1,0 +1,28 @@
+t=2026-04-13T06:20:32+0530 lvl=info msg="no configuration paths supplied"
+t=2026-04-13T06:20:32+0530 lvl=info msg="using configuration at default config path" path="/Users/vishvendrasangwa/Library/Application Support/ngrok/ngrok.yml"
+t=2026-04-13T06:20:32+0530 lvl=info msg="open config file" path="/Users/vishvendrasangwa/Library/Application Support/ngrok/ngrok.yml" err=nil
+t=2026-04-13T06:20:32+0530 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-04-13T06:20:32+0530 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-04-13T06:20:32+0530 lvl=info msg="client session established" obj=tunnels.session
+t=2026-04-13T06:20:32+0530 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-04-13T06:20:32+0530 lvl=info msg="started tunnel" obj=tunnels name=command_line addr=http://localhost:8080 url=https://pauletta-coercionary-unglacially.ngrok-free.dev
+t=2026-04-13T06:20:33+0530 lvl=info msg="update available" obj=updater
+t=2026-04-13T06:20:46+0530 lvl=info msg="join connections" obj=join id=5e4d6e815822 l=127.0.0.1:8080 r=[2406:7400:63:3049:a84e:8443:1394:994d]:60210
+t=2026-04-13T06:27:34+0530 lvl=info msg=start pg=/api/requests id=cea048eff355c492
+t=2026-04-13T06:27:34+0530 lvl=info msg=end pg=/api/requests id=cea048eff355c492 status=200 dur=3.550416ms
+t=2026-04-13T06:27:48+0530 lvl=info msg="join connections" obj=join id=ce4d42cae4a6 l=127.0.0.1:8080 r=[2406:7400:63:3049:a84e:8443:1394:994d]:62519
+t=2026-04-13T06:28:54+0530 lvl=info msg=start pg=/api/requests id=40f20ea70702120e
+t=2026-04-13T06:28:54+0530 lvl=info msg=end pg=/api/requests id=40f20ea70702120e status=200 dur=787.458µs
+t=2026-04-13T06:28:58+0530 lvl=info msg=start pg=/api/requests id=36b9fab2b747ce8d
+t=2026-04-13T06:28:58+0530 lvl=info msg=end pg=/api/requests id=36b9fab2b747ce8d status=200 dur=87.5µs
+t=2026-04-13T06:29:04+0530 lvl=info msg=start pg=/api/requests/http id=2329d0258d8af1d4
+t=2026-04-13T06:29:04+0530 lvl=info msg=end pg=/api/requests/http id=2329d0258d8af1d4 status=200 dur=1.465667ms
+t=2026-04-13T06:30:07+0530 lvl=info msg="join connections" obj=join id=e768a56cbe26 l=127.0.0.1:8080 r=[2406:7400:63:3049:a84e:8443:1394:994d]:63283
+t=2026-04-13T06:37:42+0530 lvl=info msg=start pg=/api/requests/http id=350d6372a901fc0e
+t=2026-04-13T06:37:42+0530 lvl=info msg=end pg=/api/requests/http id=350d6372a901fc0e status=200 dur=2.330125ms
+t=2026-04-13T06:37:55+0530 lvl=info msg="join connections" obj=join id=51162289f0c4 l=127.0.0.1:8080 r=[2406:7400:63:3049:a84e:8443:1394:994d]:49237
+t=2026-04-13T06:49:08+0530 lvl=info msg=start pg=/api/requests/http id=20107a35378618c9
+t=2026-04-13T06:49:08+0530 lvl=info msg=end pg=/api/requests/http id=20107a35378618c9 status=200 dur=3.255375ms
+t=2026-04-13T06:49:14+0530 lvl=info msg=start pg=/api/requests/http id=af1f08a760979b2b
+t=2026-04-13T06:49:14+0530 lvl=info msg=end pg=/api/requests/http id=af1f08a760979b2b status=200 dur=114.625µs
+t=2026-04-13T06:49:39+0530 lvl=info msg="join connections" obj=join id=b133cb9a1e22 l=127.0.0.1:8080 r=[2406:7400:63:3049:a84e:8443:1394:994d]:52996

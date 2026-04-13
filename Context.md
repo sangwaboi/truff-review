@@ -12,7 +12,7 @@
 | Field | Value |
 |-------|-------|
 | **Project** | Universal AI Code Reviewer |
-| **Repo** | https://github.com/sangwaboi/truff-review.git |
+| **Repo** | https://github.com/absolutely-ai/truff-review.git |
 | **Local Path** | `/Users/vishvendrasangwa/turff-review` |
 | **Language** | Python 3.11 (Docker) / Python 3.9 (local mac) |
 | **Framework** | FastAPI |
