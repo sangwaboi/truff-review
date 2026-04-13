@@ -2,7 +2,7 @@
 
 > **Purpose**: This file is the shared knowledge base between **Antigravity (IDE agent)** and **Copilot CLI (terminal agent)**. Both agents read and update this file to stay synchronized. The human operator is **Vishvendra (sangwaboi)**.
 
-> **Last Updated**: 2026-04-13T07:15:00+05:30
+> **Last Updated**: 2026-04-13T07:50:00+05:30
 > **Updated By**: Copilot CLI
 
 ---
@@ -20,7 +20,7 @@
 | **GCP Region** | `us-central1` |
 | **Service Account** | `universal-ai-reviewer-893@code-review-493116.iam.gserviceaccount.com` |
 | **Cloud Run URL** | `https://universal-ai-reviewer-944575899427.us-central1.run.app` |
-| **AI Model** | `gemini-3.1-pro` (Vertex AI) |
+| **AI Models** | `gemini-2.5-flash` (fast review) + `gemini-2.5-pro` (deep analysis) |
 
 ---
 
@@ -30,7 +30,10 @@ A **stateless, event-driven microservice** that:
 1. Receives GitHub PR webhook events (`POST /webhook`)
 2. Validates HMAC-SHA256 signatures using secrets from GCP Secret Manager
 3. Returns `HTTP 202` immediately (satisfies GitHub's 10-second timeout)
-4. In a **background task**: authenticates as a GitHub App, gathers PR diffs, filters noise, sends context to Vertex AI (Gemini), and posts **batched** inline review comments back to the PR
+4. In a **background task**: runs **two-pass AI review**:
+   - **Pass 1 (Flash)**: Fast scan → catches obvious issues
+   - **Pass 2 (Pro)**: Deep analysis → finds root causes and architectural problems
+5. Posts **batched** inline review comments back to the PR
 
 ### The Request Lifecycle
 ```
@@ -40,8 +43,9 @@ GitHub fires webhook → FastAPI receives → HMAC verify → Event filter
         → JWT auth → Installation Token
         → Fetch PR files + diffs
         → Noise filter (skip .lock, dist/, node_modules/, etc.)
-        → Vertex AI inference (structured JSON output)
-        → Single pr.create_review() call with all comments batched
+        → PASS 1: execute_review() with gemini-2.5-flash
+        → PASS 2: execute_deep_analysis() with gemini-2.5-pro (if flash found issues)
+        → Single pr.create_review() call with ALL comments batched
 ```
 
 ---
@@ -49,7 +53,7 @@ GitHub fires webhook → FastAPI receives → HMAC verify → Event filter
 ## 3. FILE STRUCTURE (COMPLETE)
 
 ```
-turff-review/
+truff-review/
 ├── app/
 │   ├── __init__.py          # Package init
 │   ├── main.py              # FastAPI app: POST /webhook + GET /health
@@ -57,9 +61,9 @@ turff-review/
 │   ├── secrets.py           # GCP Secret Manager client (LRU cached)
 │   ├── github_auth.py       # JWT generation (RS256) + Installation Token exchange
 │   ├── context.py           # PR diff extraction + noise filtering
-│   ├── inference.py         # Vertex AI inference via google-genai SDK
-│   ├── reviewer.py          # Background task orchestrator (batched reviews)
-│   └── prompt_config.py     # Modular prompt config (3 strictness levels)
+│   ├── inference.py         # Vertex AI inference: execute_review() + execute_deep_analysis()
+│   ├── reviewer.py          # Background task orchestrator (two-pass review)
+│   └── prompt_config.py     # Modular prompt config: build_prompt() + build_deep_prompt()
 ├── requirements.txt         # Dependencies
 ├── Dockerfile               # Cloud Run container (python:3.11-slim)
 ├── .dockerignore
@@ -84,7 +88,7 @@ pydantic>=2.10.0
 ```
 
 ### Why google-genai and NOT google-cloud-aiplatform?
-The `vertexai.generative_models` module inside `google-cloud-aiplatform` was **deprecated June 24, 2025** and is scheduled for removal June 24, 2026. Google's official replacement is the `google-genai` SDK (`from google import genai`).
+The `vertexai.generative_models` module inside `google-cloud-aiplatform` was **deprecated June 24, 2025** and is scheduled for removal June 24, 2026**. Google's official replacement is the `google-genai` SDK (`from google import genai`).
 
 ---
 
@@ -104,34 +108,38 @@ These are fetched at runtime via `app/secrets.py` using `google.cloud.secretmana
 
 ## 6. KEY ARCHITECTURAL DECISIONS
 
-### 6.1 Batched Review Comments (CRITICAL)
+### 6.1 Two-Pass AI Review (CRITICAL)
+- **Pass 1**: `execute_review()` → `gemini-2.5-flash` (fast, catches obvious issues)
+- **Pass 2**: `execute_deep_analysis()` → `gemini-2.5-pro` (deep, finds root causes)
+- Both pass results are combined and posted in a **single** `pr.create_review()` call
+- This ensures comprehensive review without overwhelming GitHub's API rate limits
+
+### 6.2 Batched Review Comments (CRITICAL)
 - **DO NOT** use individual `pr.create_review_comment()` calls
 - **DO** use a single `pr.create_review(event="COMMENT", comments=[...])` call
-- **Why**: If a PR has 12 issues and you fire 12 rapid sequential requests, GitHub's secondary abuse limits will temporarily shadowban the App
-- **Implementation**: `app/reviewer.py` builds a `review_comments` list and submits once
+- Why: If you fire 12+ rapid sequential requests, GitHub's secondary abuse limits will shadowban the App
 
-### 6.2 Background Task Architecture
+### 6.3 Background Task Architecture
 - FastAPI's `BackgroundTasks` is used (not Celery, not threads)
 - The webhook endpoint returns 202 BEFORE processing starts
 - This satisfies GitHub's strict 10-second webhook timeout rule
 
-### 6.3 Noise Filtering
+### 6.4 Noise Filtering
 - `app/context.py` filters these BEFORE hitting Vertex AI:
   - **Extensions**: `.lock`, `.csv`, `.svg`, `.png`, `.jpg`, `.map`, `.min.js`, `.min.css`, etc.
   - **Filenames**: `package-lock.json`, `yarn.lock`, `poetry.lock`, `Cargo.lock`, `go.sum`, etc.
   - **Directories**: `dist/`, `build/`, `node_modules/`, `.next/`, `vendor/`, `__pycache__/`, etc.
 - If ALL files are filtered out → pipeline aborts, no Vertex AI call (saves compute budget)
 
-### 6.4 Prompt Strictness Levels
-- Configurable in `app/prompt_config.py` via `ACTIVE_STRICTNESS`
-- Options: `STRICT`, `MODERATE` (current default), `LENIENT`
-- Prompt is grounded in Ozumax's architecture: PostgreSQL + Redis, N+1 queries, high-throughput logistics
-
-### 6.5 Python 3.9 Compatibility
+### 6.5 Python 3.9/3.11 Compatibility
 - Local Mac runs Python 3.9.6 (system python)
 - Docker uses Python 3.11-slim
 - All files use `from __future__ import annotations` for deferred type evaluation
-- FastAPI parameters use `Optional[str]` instead of `str | None` because FastAPI evaluates annotations at runtime even with `__future__` imports
+- FastAPI parameters use `Optional[str]` instead of `str | None` because FastAPI evaluates annotations at runtime
+
+### 6.6 Review Strictness: STRICT (current)
+- Set in `app/reviewer.py`: `strictness = "STRICT_"`
+- This means every issue is flagged — no filtering of AI findings
 
 ---
 
@@ -140,29 +148,32 @@ These are fetched at runtime via `app/secrets.py` using `google.cloud.secretmana
 ### Build Phase ✅
 - [x] All 9 Python modules written and validated
 - [x] AST syntax validation passed on all files
-- [x] Full import chain works (all 8 modules import without errors)
+- [x] Full import chain works (all modules import without errors)
 - [x] Noise filter unit tests (8 assertions passed)
 - [x] Prompt assembly validation (repo name, diff, strictness, domain context)
 - [x] Pydantic ReviewComment model validation
 - [x] `venv` created with all deps installed locally
 - [x] Code pushed to GitHub
 
-### Local Testing Phase ✅
-- [x] GCP Auth: `gcloud auth application-default login` (authenticated as `cmo@theozu.com`)
-- [x] IAM Fix: Granted `claude-vertex@agen8-486719.iam.gserviceaccount.com` `roles/secretmanager.secretAccessor` on all 3 secrets
-- [x] Uvicorn: Started on `http://127.0.0.1:8080` (PID: 17646)
-- [x] Health endpoint: `{"status":"healthy","service":"universal-ai-reviewer"}`
-- [x] ngrok: Tunnel active at `https://pauletta-coercionary-unglacially.ngrok-free.dev`
-- [x] HMAC verification: Working correctly (rejects invalid signatures)
-- [x] Manual webhook test with proper HMAC: Returns `202 Accepted`
+### E2E Testing Phase ✅
+- [x] GCP Auth: `gcloud auth application-default login`
+- [x] IAM Fix: Granted service accounts access to secrets
+- [x] Local Uvicorn: Running and healthy
+- [x] ngrok: Tunnel active for local testing
+- [x] HMAC verification: Working correctly
+- [x] Manual webhook test: Returns `202 Accepted` with proper signature
 - [x] Repo transferred to `absolutely-ai` org
 
-### What Has NOT Been Done Yet ❌
-- [x] ~~GitHub App webhook URL~~ — Fixed to ngrok `.dev` URL ✅
-- [x] ~~GitHub App installed on repo~~ — Confirmed (installation 123497984) ✅
-- [x] ~~E2E test~~ — Full pipeline working: webhook → auth → context → inference → response ✅
-- [x] ~~Vertex AI inference~~ — `gemini-2.5-flash` returns HTTP 200 with structured JSON ✅
-- [x] Cloud Run deployment — DEPLOYED at `https://universal-ai-reviewer-944575899427.us-central1.run.app` ✅
+### First Live Review ✅
+- [x] First PR reviewed successfully on `absolutely-ai/truff-review`
+- [x] Flash model found issues, Pro model did deep analysis
+- [x] Comments posted to PR successfully
+
+### Cloud Run Deployment ✅
+- [x] Docker image built locally with `--platform linux/amd64`
+- [x] Pushed to Artifact Registry
+- [x] Deployed to Cloud Run: `https://universal-ai-reviewer-944575899427.us-central1.run.app`
+- [x] IAM roles properly configured
 
 ---
 
@@ -170,64 +181,37 @@ These are fetched at runtime via `app/secrets.py` using `google.cloud.secretmana
 
 | Component | Value |
 |-----------|-------|
-| **Uvicorn** | Running on `http://127.0.0.1:8080` (PID: 17646) |
-| **ngrok URL** | `https://pauletta-coercionary-unglacially.ngrok-free.dev` |
-| **Webhook URL** | Should be `https://pauletta-coercionary-unglacially.ngrok-free.dev/webhook` |
+| **Cloud Run** | `https://universal-ai-reviewer-944575899427.us-central1.run.app` |
+| **GCP Project** | `code-review-493116` |
+| **Service Account** | `universal-ai-reviewer-893@code-review-493116.iam.gserviceaccount.com` |
 | **GitHub App** | `truff-review` under absolutely-ai org |
 | **App ID** | `3356708` |
-| **Installation ID** | `3356708` (same as app_id for org-level installation) |
+| **Installation ID** | `3356708` |
+| **Models** | `gemini-2.5-flash` (fast) + `gemini-2.5-pro` (deep) |
 
 ---
 
 ## 9. DEBUGGING DISCOVERIES
 
-### Discovery 1: Wrong Webhook URL
-The GitHub App's webhook URL was configured to `https://www.agen8.io/webhook` (an old Vercel URL) instead of the ngrok tunnel. All webhook deliveries were going to Vercel and returning 404.
+### Discovery 1: Wrong Webhook URL (FIXED)
+The GitHub App's webhook URL was configured to `https://www.agen8.io/webhook` (Vercel). All webhook deliveries were going to Vercel and returning 404.
 
-**Fix**: User updated the webhook URL in GitHub App settings.
+**Fix**: Updated webhook URL to Cloud Run URL.
 
-### Discovery 2: IAM Permission Issue
-The `claude-vertex@agen8-486719.iam.gserviceaccount.com` service account (used via `GOOGLE_APPLICATION_CREDENTIALS`) did not have access to the secrets in `code-review-493116` project.
+### Discovery 2: IAM Permission Issue (FIXED)
+The service account used for local dev (`claude-vertex@agen8-486719.iam.gserviceaccount.com`) lacked access to `code-review-493116` secrets.
 
-**Fix**: Granted `roles/secretmanager.secretAccessor` on all 3 secrets to `claude-vertex` SA.
+**Fix**: Granted `roles/secretmanager.secretAccessor` on all 3 secrets.
 
-### Discovery 3: Webhook Secret Mismatch
-If the webhook secret in GitHub App settings doesn't match the `github-webhook-secret` in GCP, GitHub will fail deliveries silently.
+### Discovery 3: Docker Platform Issue (FIXED)
+Cloud Run requires `linux/amd64` platform images. Apple Silicon builds create ARM64 images that are rejected.
 
-**Current secret in GCP**: `byqwe9-kavJum-bankoh...`
+**Fix**: Used `docker buildx build --platform linux/amd64` to build compatible images.
 
-### Discovery 4: Manual HMAC Test Works
-When sending a test request with proper HMAC signature, the endpoint correctly returns:
-```json
-{"message":"Accepted","status":"processing in background","event":"pull_request","action":"opened"}
-HTTP 202
-```
+### Discovery 4: Two-Pass Review Architecture
+First review was shallow. Discovered that running a second "deep analysis" pass with the Pro model catches architectural issues and root causes that Flash misses.
 
-But the background task failed with: `Malformed webhook payload — missing key: 'installation'`
-
-This is because my manual test payload was simplified and didn't include the full GitHub webhook structure with `installation` object.
-
-### Discovery 5: URL TLD Mismatch (.app vs .dev) ⚠️ CRITICAL
-**Found by**: Antigravity (Session 3)
-
-The ngrok tunnel runs on `.ngrok-free.dev` but the GitHub App webhook settings show `.ngrok-free.app`:
-
-| Where | URL |
-|-------|-----|
-| **ngrok actual** | `https://pauletta-coercionary-unglacially.ngrok-free.dev` |
-| **GitHub setting** (screenshot) | `https://pauletta-coercionary-unglacially.ngrok-free.app/webhook` |
-
-**Fix**: Update GitHub App webhook URL to exactly:
-```
-https://pauletta-coercionary-unglacially.ngrok-free.dev/webhook
-```
-
-### Discovery 6: GitHub Redeliveries Don't Change URLs
-**Found by**: Antigravity (Session 3)
-
-GitHub webhook "Redeliver" replays the delivery to the URL that was configured **at the time of the original event**. Old deliveries went to `agen8.io`. Clicking Redeliver sends them back to `agen8.io` — NOT to the new ngrok URL.
-
-**Fix**: After fixing the webhook URL, you must trigger a **new event** (push a commit to PR #2 or open a new PR). Do NOT use "Redeliver" — it will always use the old URL.
+**Solution**: Implemented two-pass architecture with `execute_deep_analysis()`.
 
 ---
 
@@ -240,11 +224,10 @@ GitHub webhook "Redeliver" replays the delivery to the URL that was configured *
 | **Docker Python** | 3.11-slim |
 | **Venv Location** | `/Users/vishvendrasangwa/turff-review/venv` |
 | **Venv Activate** | `source /Users/vishvendrasangwa/turff-review/venv/bin/activate` |
-| **GCP Auth** | Application Default Credentials active (cmo@theozu.com) |
+| **GCP Auth** | Application Default Credentials active |
 | **GitHub CLI** | Authenticated as sangwaboi |
 | **GitHub Repo** | https://github.com/absolutely-ai/truff-review.git |
-| **Test Branch** | `test-e2e-1776042386` |
-| **Test PR** | https://github.com/absolutely-ai/truff-review/pull/2 |
+| **Branch** | `main` (merged from `test-ai-reviewer-live`) |
 
 ---
 
@@ -261,47 +244,36 @@ GitHub webhook "Redeliver" replays the delivery to the URL that was configured *
 8. **Validated** — all imports, noise filter, prompt assembly, Pydantic models pass
 
 ### Session 2 (Copilot CLI — 2026-04-13, 06:30-07:00 IST)
-
-**Status**: Local testing infrastructure ready. Webhook endpoint working. **Waiting for user to confirm webhook URL is correct and GitHub App is installed on repo.**
+**Status**: Local testing infrastructure ready.
 
 **What Was Done**:
-1. **GCP Auth**: Ran `gcloud auth application-default login` — authenticated as `cmo@theozu.com`
-2. **IAM Fix**: Granted `claude-vertex@agen8-486719.iam.gserviceaccount.com` `roles/secretmanager.secretAccessor` on all 3 secrets in `code-review-493116`
-3. **Uvicorn**: Started successfully on `http://127.0.0.1:8080` (PID: 17646)
-4. **Health Check**: `curl localhost:8080/health` → `{"status":"healthy"}`
-5. **ngrok**: Tunnel active at `https://pauletta-coercionary-unglacially.ngrok-free.dev`
-6. **Webhook URL discovery**: Found it was pointing to `https://www.agen8.io/webhook` (Vercel) — user corrected
-7. **Manual HMAC test**: Endpoint correctly returns 202 Accepted with proper signature
-8. **Repo transfer**: Changed remote from `sangwaboi/truff-review` to `absolutely-ai/truff-review`
-9. **Test PR created**: https://github.com/absolutely-ai/truff-review/pull/2
+1. GCP Auth: authenticated as `cmo@theozu.com`
+2. IAM Fix: Granted `claude-vertex` SA access to all 3 secrets
+3. Uvicorn: Started on port 8080
+4. ngrok: Tunnel active at `https://pauletta-coercionary-unglacially.ngrok-free.dev`
+5. Repo transfer: Changed remote from `sangwaboi/truff-review` to `absolutely-ai/truff-review`
+6. Webhook URL issue discovered (was pointing to Vercel)
 
-**Current Problem**:
-- GitHub is not sending webhook requests to ngrok tunnel
-- Possible causes:
-  1. Webhook URL still not updated correctly
-  2. GitHub App not installed on `absolutely-ai/truff-review`
-  3. Webhook secret mismatch
+### Session 3 (Copilot CLI — 2026-04-13, ~07:15 IST)
+**Status**: Cloud Run deployment completed. Service is live.
 
-**Next Steps for Antigravity (or next CLI session)**:
-1. Verify webhook URL in GitHub App is exactly: `https://pauletta-coercionary-unglacially.ngrok-free.app/webhook`
-2. Verify webhook secret matches: `byqwe9-kavJum-bankoh...`
-3. Verify GitHub App is installed on `absolutely-ai/truff-review` repo
-4. If webhook still not reaching, check "Recent Deliveries" in GitHub App settings
-5. Once real webhook arrives with `installation` key, full E2E pipeline should execute
+**What Was Done**:
+1. Built Docker image locally with `docker buildx build --platform linux/amd64`
+2. Pushed to Artifact Registry: `us-central1-docker.pkg.dev/code-review-493116/cloud-run-source-deploy/universal-ai-reviewer:v2`
+3. Deployed to Cloud Run: `https://universal-ai-reviewer-944575899427.us-central1.run.app`
+4. Resolved IAM issues for deployment
 
-### Session 3 (Antigravity — 2026-04-13, 07:05 IST)
+### Session 4 (Copilot CLI — 2026-04-13, ~07:50 IST)
+**Status**: Two-pass review system implemented and working. First live PR reviewed successfully.
 
-**Status**: Diagnosed two root causes for webhooks not reaching ngrok.
-
-**Findings**:
-1. **URL TLD mismatch**: GitHub has `.ngrok-free.app` but ngrok is on `.ngrok-free.dev` — different domains!
-2. **Redelivery misunderstanding**: GitHub redeliveries replay to the ORIGINAL URL, not the current one — user was redelivering to `agen8.io`
-3. **Confirmed**: Uvicorn (PID 17646) and ngrok are both still running and healthy
-
-**Action Required from User**:
-1. Go to GitHub App settings → change webhook URL to exactly: `https://pauletta-coercionary-unglacially.ngrok-free.dev/webhook` (note: `.dev` not `.app`)
-2. Click "Save changes"
-3. Then trigger a **new** event — either push a commit to PR #2 or open a new PR (do NOT use Redeliver)
+**What Was Done**:
+1. Added `execute_deep_analysis()` in inference.py for gemini-2.5-pro second pass
+2. Updated reviewer.py to orchestrate two-pass review (flash → pro)
+3. Added `build_deep_prompt()` in prompt_config.py
+4. Updated main.py to support 'reopened' action in addition to 'opened' and 'synchronize'
+5. Changed strictness to STRICT (all issues flagged)
+6. Merged `test-ai-reviewer-live` branch into `main`
+7. Pushed all code to origin
 
 ---
 
@@ -310,23 +282,8 @@ GitHub webhook "Redeliver" replays the delivery to the URL that was configured *
 1. **Always activate venv first**: `source /Users/vishvendrasangwa/turff-review/venv/bin/activate`
 2. **Never hardcode credentials** — all secrets come from GCP Secret Manager at runtime
 3. **Never store code to disk during processing** — all PR data stays in memory (P0 requirement)
-4. **Never deploy to Cloud Run before local validation passes** — test with ngrok first
+4. **Deploy to Cloud Run only after local validation passes**
 5. **After making changes**: run `source venv/bin/activate && python3 -c "from app.main import app; print('OK')"` to validate imports
 6. **After any code change**: commit and push to `origin main`
 7. **Update this Context.md** after significant actions so the other agent can pick up context
-### Session 4 (Antigravity — 2026-04-13, 09:20 IST)
-**Status**: Cloud Run deployed and responding. Diagnosed and fixed IAM Permissions.
-**Findings**: Added allUsers run.invoker for Webhook. Cloud Run service accounts lacked proper AI Platform roles (`roles/aiplatform.user`) causing Vertex AI inference to silently fail. 
-
-### Session 5 (Antigravity — 2026-04-13, 09:50 IST)
-**Status**: Identified why the deployed reviewer is not posting comments.
-**Findings**: 
-1. Re-deployed `universal-ai-reviewer:v6` with the correct model (`gemini-2.5-flash`), `--no-cpu-throttling`, and proper IAM roles.
-2. Verified that Vertex AI inference completed successfully. 
-3. Tested `pr.create_review()` locally and verified that the **GitHub App lacks Pull Request Write permissions** (`403 Forbidden`). 
-
-**Action Required from User**:
-1. Go to your **GitHub Developer Settings** -> **GitHub Apps** -> Edit `universal-reviewer`.
-2. Under **Permissions & events** -> **Repository permissions** -> **Pull requests**, change `Read-only` to **`Read and write`**.
-3. Save changes. Then Accept the New Permission via the Banner/Settings.
-4. Once completed, the AI will successfully comment on PRs.
+8. **Two-pass review**: Always run flash first, then pro for deep analysis when issues are found

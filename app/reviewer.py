@@ -105,10 +105,17 @@ def process_pull_request(repo_name: str, pr_number: int, installation_id: int) -
 
     if not comments:
         logger.info(
-            "AI found no issues in PR #%d on %s. No comments to post.",
+            "AI found no issues in PR #%d on %s. Posting clean bill of health.",
             pr_number,
             repo_name,
         )
+        try:
+            pr.create_issue_comment(
+                "✅ **AI Code Review** — I reviewed this PR and found no issues!\n\n"
+                "_Reviewed by Universal AI Reviewer (Gemini) · Strictness: STRICT_"
+            )
+        except Exception as exc:
+            logger.error("Failed to post 'no issues' comment for %s PR #%d: %s", repo_name, pr_number, exc)
         return
 
     # -----------------------------------------------------------------------
@@ -222,5 +229,40 @@ def process_pull_request(repo_name: str, pr_number: int, installation_id: int) -
             pr_number,
             len(deep_review_comments),
         )
+    except GithubException as exc:
+        # ---------------------------------------------------------------
+        # Self-Correcting Fallback: If GitHub rejects inline comments
+        # (typically 422 "Line could not be resolved" due to hallucinated
+        # line numbers), fall back to posting findings as a general
+        # PR thread comment so the developer still gets the analysis.
+        # ---------------------------------------------------------------
+        logger.warning(
+            "GitHub rejected inline Deep Review for %s PR #%d (status: %s). "
+            "Falling back to thread comment.",
+            repo_name, pr_number, getattr(exc, "status", "N/A"),
+        )
+
+        # Format all deep comments into a readable markdown block
+        fallback_body = (
+            f"🧠 **Principal Architect Code Review** — {len(deep_review_comments)} "
+            f"deep root-cause issue{'s' if len(deep_review_comments) != 1 else ''} found.\n\n"
+            f"_Note: Some line references could not be resolved as inline comments, "
+            f"so they are listed here instead._\n\n---\n\n"
+        )
+        for c in deep_comments:
+            fallback_body += f"**`{c.path}` (line {c.line})**\n{c.body}\n\n---\n\n"
+        fallback_body += "_Reviewed by Universal AI Reviewer (Gemini Pro) · Strictly Analyzing architecture_"
+
+        try:
+            pr.create_issue_comment(fallback_body)
+            logger.info(
+                "Deep Review fallback comment posted for %s PR #%d: %d issues",
+                repo_name, pr_number, len(deep_comments),
+            )
+        except Exception as fallback_exc:
+            logger.error(
+                "Failed to post Deep Review fallback for %s PR #%d: %s",
+                repo_name, pr_number, fallback_exc,
+            )
     except Exception as exc:
         logger.error("Failed to post Deep review for %s PR #%d: %s", repo_name, pr_number, exc)
