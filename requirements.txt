@@ -1,0 +1,16 @@
+# Universal AI Code Reviewer — Dependencies
+# FastAPI + ASGI server
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+
+# Google Cloud
+google-cloud-secret-manager>=2.22.0
+google-genai>=1.14.0
+
+# GitHub
+PyGithub>=2.6.0
+PyJWT[crypto]>=2.10.0
+requests>=2.32.0
+
+# Data validation
+pydantic>=2.10.0
