@@ -2,8 +2,8 @@
 
 > **Purpose**: This file is the shared knowledge base between **Antigravity (IDE agent)** and **Copilot CLI (terminal agent)**. Both agents read and update this file to stay synchronized. The human operator is **Vishvendra (sangwaboi)**.
 
-> **Last Updated**: 2026-04-13T06:03:00+05:30  
-> **Updated By**: Antigravity (IDE)
+> **Last Updated**: 2026-04-13T06:25:00+05:30  
+> **Updated By**: Copilot CLI
 
 ---
 
@@ -275,7 +275,7 @@ hmac.compare_digest(expected, signature_header)  # Timing-attack safe
 | **GCP Auth** | Application Default Credentials (needs `gcloud auth application-default login`) |
 | **GitHub Repo** | https://github.com/sangwaboi/truff-review.git |
 | **Branch** | `main` |
-| **Last Commit** | `7e0fea0` — merge + all 14 project files |
+| **Last Commit** | `aa162754` — docs: add Context.md — shared handoff document between IDE and CLI agents |
 
 ---
 
@@ -291,8 +291,30 @@ hmac.compare_digest(expected, signature_header)  # Timing-attack safe
 7. **Pushed to GitHub** — https://github.com/sangwaboi/truff-review.git
 8. **Validated** — all imports, noise filter, prompt assembly, Pydantic models pass
 
-### Session 2 (Copilot CLI — PENDING)
-_Copilot CLI to document its actions here._
+### Session 2 (Copilot CLI — 2026-04-13, 06:30 IST)
+
+**Status**: Local testing IN PROGRESS. Webhook endpoint is live and responding.
+
+**What Was Done**:
+1. **GCP Auth**: Ran `gcloud auth application-default login` — authenticated as `cmo@theozu.com`
+2. **IAM Fix**: Discovered `claude-vertex@agen8-486719.iam.gserviceaccount.com` (local dev SA) lacked access to `code-review-493116` secrets
+   - Granted `roles/secretmanager.secretAccessor` on all 3 secrets to `claude-vertex` SA
+3. **Uvicorn**: Started successfully on `http://127.0.0.1:8080` (PID: 17646)
+4. **Health Check**: `curl http://localhost:8080/health` → `{"status":"healthy","service":"universal-ai-reviewer"}`
+5. **ngrok**: Tunnel active at `https://pauletta-coercionary-unglacially.ngrok-free.dev`
+6. **Webhook Test**: POST without signature → `401 Missing x-hub-signature-256 header` (EXPECTED — endpoint working correctly)
+
+**Still PENDING**:
+- [ ] Configure GitHub App webhook URL to point to ngrok URL
+- [ ] End-to-end test with real PR event (requires GitHub App installation + HMAC signature)
+- [ ] Verify Vertex AI inference works end-to-end
+
+**Critical Discovery**: The `claude-vertex` service account (used for local dev via `GOOGLE_APPLICATION_CREDENTIALS`) needed explicit IAM grant on `code-review-493116` secrets. This was NOT documented in the original setup.
+
+**Next Step**: User needs to configure GitHub App webhook URL:
+```
+Webhook URL: https://pauletta-coercionary-unglacially.ngrok-free.app/webhook
+```
 
 ---
 
