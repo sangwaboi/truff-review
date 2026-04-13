@@ -26,3 +26,5 @@ t=2026-04-13T06:49:08+0530 lvl=info msg=end pg=/api/requests/http id=20107a35378
 t=2026-04-13T06:49:14+0530 lvl=info msg=start pg=/api/requests/http id=af1f08a760979b2b
 t=2026-04-13T06:49:14+0530 lvl=info msg=end pg=/api/requests/http id=af1f08a760979b2b status=200 dur=114.625µs
 t=2026-04-13T06:49:39+0530 lvl=info msg="join connections" obj=join id=b133cb9a1e22 l=127.0.0.1:8080 r=[2406:7400:63:3049:a84e:8443:1394:994d]:52996
+t=2026-04-13T06:50:16+0530 lvl=info msg=start pg=/api/requests/http id=91e4e07e994c7b36
+t=2026-04-13T06:50:16+0530 lvl=info msg=end pg=/api/requests/http id=91e4e07e994c7b36 status=200 dur=346.292µs
