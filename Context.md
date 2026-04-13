@@ -157,12 +157,11 @@ These are fetched at runtime via `app/secrets.py` using `google.cloud.secretmana
 - [x] Repo transferred to `absolutely-ai` org
 
 ### What Has NOT Been Done Yet ❌
-- [ ] **CRITICAL**: GitHub App webhook URL was pointing to `https://www.agen8.io/webhook` (wrong!)
-  - User updated it but we haven't confirmed it's now pointing to ngrok URL
-- [ ] Confirm GitHub App is installed on `absolutely-ai/truff-review`
-- [ ] End-to-end test: Real PR event from GitHub should trigger full pipeline
-- [ ] Verify Vertex AI inference works end-to-end
-- [ ] Cloud Run deployment (DO NOT deploy yet — validate locally first)
+- [x] ~~GitHub App webhook URL~~ — Fixed to ngrok `.dev` URL ✅
+- [x] ~~GitHub App installed on repo~~ — Confirmed (installation 123497984) ✅
+- [x] ~~E2E test~~ — Full pipeline working: webhook → auth → context → inference → response ✅
+- [x] ~~Vertex AI inference~~ — `gemini-2.5-flash` returns HTTP 200 with structured JSON ✅
+- [ ] Cloud Run deployment (ready to deploy — local validation PASSED)
 
 ---
 

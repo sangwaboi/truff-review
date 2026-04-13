@@ -1,0 +1,30 @@
+/Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/google/api_core/_python_version_support.py:242: FutureWarning: You are using a non-supported Python version (3.9.6). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+/Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/google/api_core/_python_version_support.py:242: FutureWarning: You are using a non-supported Python version (3.9.6). Google will not post any further updates to google.cloud.secretmanager_v1 supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.cloud.secretmanager_v1.
+  warnings.warn(message, FutureWarning)
+INFO:     Started server process [65696]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+INFO:     127.0.0.1:64694 - "GET /health HTTP/1.1" 200 OK
+2026-04-13T07:26:49 [INFO] app.secrets: Fetching secret: github-webhook-secret (version: latest)
+2026-04-13T07:26:50 [INFO] app.main: Accepted PR event: action=synchronize, repo=absolutely-ai/truff-review, PR=#2
+INFO:     140.82.115.32:0 - "POST /webhook HTTP/1.1" 202 Accepted
+2026-04-13T07:26:50 [INFO] app.reviewer: Processing PR #2 (test: E2E webhook testing) on absolutely-ai/truff-review [installation: 123497984]
+2026-04-13T07:26:50 [INFO] app.secrets: Fetching secret: github-app-id (version: latest)
+2026-04-13T07:26:50 [INFO] app.secrets: Fetching secret: github-private-key (version: latest)
+2026-04-13T07:26:51 [INFO] app.github_auth: Generated JWT for GitHub App ID: 3356708
+2026-04-13T07:26:51 [INFO] app.github_auth: Obtained installation token for installation ID: 123497984
+2026-04-13T07:26:56 [INFO] app.context: Context assembly complete: 6 files reviewed, 0 skipped
+2026-04-13T07:26:56 [INFO] app.inference: Sending inference request to gemini-2.5-flash for repo: absolutely-ai/truff-review
+2026-04-13T07:26:56 [INFO] google_genai.models: AFC is enabled with max remote calls: 10.
+I0413 07:26:56.942009 11622718 ev_poll_posix.cc:593] FD from fork parent still in poll list: fd(20, generation: 1)
+2026-04-13T07:27:07 [INFO] httpx: HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1beta1/projects/code-review-493116/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-04-13T07:27:07 [INFO] app.inference: Inference complete for absolutely-ai/truff-review: 0 comments generated
+2026-04-13T07:27:07 [INFO] app.reviewer: AI found no issues in PR #2 on absolutely-ai/truff-review. No comments to post.
