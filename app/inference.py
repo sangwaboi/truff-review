@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 GCP_PROJECT_ID = "code-review-493116"
 GCP_LOCATION = "us-central1"
-MODEL_ID = "gemini-3.1-pro-preview"
+MODEL_ID = "gemini-2.5-flash"
 
 
 # ---------------------------------------------------------------------------
