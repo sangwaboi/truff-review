@@ -207,6 +207,28 @@ But the background task failed with: `Malformed webhook payload — missing key:
 
 This is because my manual test payload was simplified and didn't include the full GitHub webhook structure with `installation` object.
 
+### Discovery 5: URL TLD Mismatch (.app vs .dev) ⚠️ CRITICAL
+**Found by**: Antigravity (Session 3)
+
+The ngrok tunnel runs on `.ngrok-free.dev` but the GitHub App webhook settings show `.ngrok-free.app`:
+
+| Where | URL |
+|-------|-----|
+| **ngrok actual** | `https://pauletta-coercionary-unglacially.ngrok-free.dev` |
+| **GitHub setting** (screenshot) | `https://pauletta-coercionary-unglacially.ngrok-free.app/webhook` |
+
+**Fix**: Update GitHub App webhook URL to exactly:
+```
+https://pauletta-coercionary-unglacially.ngrok-free.dev/webhook
+```
+
+### Discovery 6: GitHub Redeliveries Don't Change URLs
+**Found by**: Antigravity (Session 3)
+
+GitHub webhook "Redeliver" replays the delivery to the URL that was configured **at the time of the original event**. Old deliveries went to `agen8.io`. Clicking Redeliver sends them back to `agen8.io` — NOT to the new ngrok URL.
+
+**Fix**: After fixing the webhook URL, you must trigger a **new event** (push a commit to PR #2 or open a new PR). Do NOT use "Redeliver" — it will always use the old URL.
+
 ---
 
 ## 10. ENVIRONMENT INFO
@@ -266,6 +288,20 @@ This is because my manual test payload was simplified and didn't include the ful
 3. Verify GitHub App is installed on `absolutely-ai/truff-review` repo
 4. If webhook still not reaching, check "Recent Deliveries" in GitHub App settings
 5. Once real webhook arrives with `installation` key, full E2E pipeline should execute
+
+### Session 3 (Antigravity — 2026-04-13, 07:05 IST)
+
+**Status**: Diagnosed two root causes for webhooks not reaching ngrok.
+
+**Findings**:
+1. **URL TLD mismatch**: GitHub has `.ngrok-free.app` but ngrok is on `.ngrok-free.dev` — different domains!
+2. **Redelivery misunderstanding**: GitHub redeliveries replay to the ORIGINAL URL, not the current one — user was redelivering to `agen8.io`
+3. **Confirmed**: Uvicorn (PID 17646) and ngrok are both still running and healthy
+
+**Action Required from User**:
+1. Go to GitHub App settings → change webhook URL to exactly: `https://pauletta-coercionary-unglacially.ngrok-free.dev/webhook` (note: `.dev` not `.app`)
+2. Click "Save changes"
+3. Then trigger a **new** event — either push a commit to PR #2 or open a new PR (do NOT use Redeliver)
 
 ---
 

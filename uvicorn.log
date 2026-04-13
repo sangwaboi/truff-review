@@ -1,6 +1,6 @@
 INFO:     Will watch for changes in these directories: ['/Users/vishvendrasangwa/turff-review']
-INFO:     Uvicorn running on http://127.0.0.1:8080 (Press CTRL+C to quit)
-INFO:     Started reloader process [17646] using WatchFiles
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+INFO:     Started reloader process [54812] using WatchFiles
 /Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/google/api_core/_python_version_support.py:242: FutureWarning: You are using a non-supported Python version (3.9.6). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
   warnings.warn(message, FutureWarning)
 /Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
@@ -11,33 +11,38 @@ INFO:     Started reloader process [17646] using WatchFiles
   warnings.warn(eol_message.format("3.9"), FutureWarning)
 /Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/google/api_core/_python_version_support.py:242: FutureWarning: You are using a non-supported Python version (3.9.6). Google will not post any further updates to google.cloud.secretmanager_v1 supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.cloud.secretmanager_v1.
   warnings.warn(message, FutureWarning)
-INFO:     Started server process [17659]
+INFO:     Started server process [54816]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:60099 - "GET /health HTTP/1.1" 200 OK
-2026-04-13T06:20:47 [INFO] app.secrets: Fetching secret: github-webhook-secret (version: latest)
-2026-04-13T06:20:47 [ERROR] app.main: Failed to fetch webhook secret: 403 Permission 'secretmanager.versions.access' denied on resource (or it may not exist). [reason: "IAM_PERMISSION_DENIED"
-domain: "iam.googleapis.com"
-metadata {
-  key: "permission"
-  value: "secretmanager.versions.access"
-}
-]
-INFO:     2406:7400:63:3049:a84e:8443:1394:994d:0 - "POST /webhook HTTP/1.1" 500 Internal Server Error
-2026-04-13T06:21:46 [INFO] app.secrets: Fetching secret: github-webhook-secret (version: latest)
-2026-04-13T06:21:47 [ERROR] app.main: Failed to fetch webhook secret: 403 Permission 'secretmanager.versions.access' denied on resource (or it may not exist). [reason: "IAM_PERMISSION_DENIED"
-domain: "iam.googleapis.com"
-metadata {
-  key: "permission"
-  value: "secretmanager.versions.access"
-}
-]
-INFO:     127.0.0.1:60578 - "POST /webhook HTTP/1.1" 500 Internal Server Error
-2026-04-13T06:24:16 [INFO] app.secrets: Fetching secret: github-webhook-secret (version: latest)
-INFO:     127.0.0.1:61463 - "POST /webhook HTTP/1.1" 401 Unauthorized
-INFO:     2406:7400:63:3049:a84e:8443:1394:994d:0 - "GET /health HTTP/1.1" 200 OK
-INFO:     2406:7400:63:3049:a84e:8443:1394:994d:0 - "POST /webhook HTTP/1.1" 401 Unauthorized
-INFO:     2406:7400:63:3049:a84e:8443:1394:994d:0 - "GET /health HTTP/1.1" 200 OK
-2026-04-13T06:49:39 [INFO] app.main: Accepted PR event: action=opened, repo=absolutely-ai/truff-review, PR=#999
-INFO:     2406:7400:63:3049:a84e:8443:1394:994d:0 - "POST /webhook HTTP/1.1" 202 Accepted
-2026-04-13T06:49:39 [ERROR] app.reviewer: Malformed webhook payload — missing key: 'installation'
+INFO:     127.0.0.1:59860 - "GET /health HTTP/1.1" 200 OK
+2026-04-13T07:11:52 [INFO] app.secrets: Fetching secret: github-webhook-secret (version: latest)
+2026-04-13T07:11:53 [INFO] app.main: Accepted PR event: action=synchronize, repo=absolutely-ai/truff-review, PR=#2
+INFO:     140.82.115.243:0 - "POST /webhook HTTP/1.1" 202 Accepted
+2026-04-13T07:11:54 [INFO] app.reviewer: Processing PR #2 (test: E2E webhook testing) on absolutely-ai/truff-review [installation: 123497984]
+2026-04-13T07:11:54 [INFO] app.secrets: Fetching secret: github-app-id (version: latest)
+2026-04-13T07:11:54 [INFO] app.secrets: Fetching secret: github-private-key (version: latest)
+2026-04-13T07:11:55 [INFO] app.github_auth: Generated JWT for GitHub App ID: 3356708
+2026-04-13T07:11:55 [INFO] app.github_auth: Obtained installation token for installation ID: 123497984
+2026-04-13T07:12:00 [INFO] app.context: Context assembly complete: 5 files reviewed, 0 skipped
+2026-04-13T07:12:00 [INFO] app.inference: Sending inference request to gemini-3.1-pro for repo: absolutely-ai/truff-review
+2026-04-13T07:12:00 [INFO] google_genai.models: AFC is enabled with max remote calls: 10.
+2026-04-13T07:12:02 [INFO] httpx: HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1beta1/projects/code-review-493116/locations/us-central1/publishers/google/models/gemini-3.1-pro:generateContent "HTTP/1.1 404 Not Found"
+2026-04-13T07:12:02 [ERROR] app.reviewer: Vertex AI inference failed for absolutely-ai/truff-review PR #2: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'Publisher Model `projects/code-review-493116/locations/us-central1/publishers/google/models/gemini-3.1-pro` was not found or your project does not have access to it. Please ensure you are using a valid model version. For more information, see: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions', 'status': 'NOT_FOUND'}}
+WARNING:  WatchFiles detected changes in 'app/inference.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [54816]
+/Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/google/api_core/_python_version_support.py:242: FutureWarning: You are using a non-supported Python version (3.9.6). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+/Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/Users/vishvendrasangwa/turff-review/venv/lib/python3.9/site-packages/google/api_core/_python_version_support.py:242: FutureWarning: You are using a non-supported Python version (3.9.6). Google will not post any further updates to google.cloud.secretmanager_v1 supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.cloud.secretmanager_v1.
+  warnings.warn(message, FutureWarning)
+INFO:     Started server process [55910]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

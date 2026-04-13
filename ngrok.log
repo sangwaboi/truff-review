@@ -28,3 +28,27 @@ t=2026-04-13T06:49:14+0530 lvl=info msg=end pg=/api/requests/http id=af1f08a7609
 t=2026-04-13T06:49:39+0530 lvl=info msg="join connections" obj=join id=b133cb9a1e22 l=127.0.0.1:8080 r=[2406:7400:63:3049:a84e:8443:1394:994d]:52996
 t=2026-04-13T06:50:16+0530 lvl=info msg=start pg=/api/requests/http id=91e4e07e994c7b36
 t=2026-04-13T06:50:16+0530 lvl=info msg=end pg=/api/requests/http id=91e4e07e994c7b36 status=200 dur=346.292µs
+t=2026-04-13T07:05:23+0530 lvl=info msg=start pg=/api/tunnels id=c2c83ecb8524f1a5
+t=2026-04-13T07:05:23+0530 lvl=info msg=end pg=/api/tunnels id=c2c83ecb8524f1a5 status=200 dur=3.398875ms
+t=2026-04-13T07:07:32+0530 lvl=info msg=start pg=/api/requests/http id=f5748db52053c99a
+t=2026-04-13T07:07:32+0530 lvl=info msg=end pg=/api/requests/http id=f5748db52053c99a status=200 dur=755.333µs
+t=2026-04-13T07:07:40+0530 lvl=info msg=start pg=/api/requests/http id=336606f5e43ff1d0
+t=2026-04-13T07:07:40+0530 lvl=info msg=end pg=/api/requests/http id=336606f5e43ff1d0 status=200 dur=132.417µs
+t=2026-04-13T07:07:49+0530 lvl=info msg=start pg=/api/requests/http id=a93c1e61a16c894b
+t=2026-04-13T07:07:49+0530 lvl=info msg=end pg=/api/requests/http id=a93c1e61a16c894b status=200 dur=360.125µs
+t=2026-04-13T07:08:00+0530 lvl=info msg=start pg=/api/requests/http id=be6ef8adbde30fb1
+t=2026-04-13T07:08:00+0530 lvl=info msg=end pg=/api/requests/http id=be6ef8adbde30fb1 status=200 dur=570.917µs
+t=2026-04-13T07:08:10+0530 lvl=info msg="join connections" obj=join id=81d5b98a0097 l=127.0.0.1:8080 r=140.82.115.123:62392
+t=2026-04-13T07:08:34+0530 lvl=info msg="join connections" obj=join id=e4341626340d l=127.0.0.1:8080 r=140.82.115.35:24070
+t=2026-04-13T07:08:47+0530 lvl=info msg=start pg=/api/requests/http id=3bc9792f66ceba40
+t=2026-04-13T07:08:47+0530 lvl=info msg=end pg=/api/requests/http id=3bc9792f66ceba40 status=200 dur=351.834µs
+t=2026-04-13T07:09:05+0530 lvl=info msg="join connections" obj=join id=6bacd40422f9 l=127.0.0.1:8080 r=140.82.115.112:35922
+t=2026-04-13T07:09:28+0530 lvl=info msg="join connections" obj=join id=acf5b298c54e l=127.0.0.1:8080 r=140.82.115.174:40734
+t=2026-04-13T07:10:19+0530 lvl=info msg="join connections" obj=join id=a12dc0acfa9a l=127.0.0.1:8080 r=140.82.115.117:56810
+t=2026-04-13T07:10:31+0530 lvl=info msg="join connections" obj=join id=425af88d4a64 l=127.0.0.1:8080 r=140.82.115.98:20946
+t=2026-04-13T07:10:31+0530 lvl=info msg="join connections" obj=join id=32cc90a7db18 l=127.0.0.1:8080 r=140.82.115.104:22964
+t=2026-04-13T07:10:31+0530 lvl=info msg="join connections" obj=join id=6b575df00751 l=127.0.0.1:8080 r=140.82.115.154:28712
+t=2026-04-13T07:10:31+0530 lvl=info msg="join connections" obj=join id=90b28781f237 l=127.0.0.1:8080 r=140.82.115.24:23994
+t=2026-04-13T07:10:31+0530 lvl=info msg="join connections" obj=join id=051eaf2d43f5 l=127.0.0.1:8080 r=140.82.115.44:38678
+t=2026-04-13T07:10:31+0530 lvl=info msg="join connections" obj=join id=0c44a06e747b l=127.0.0.1:8080 r=140.82.115.44:38682
+t=2026-04-13T07:11:52+0530 lvl=info msg="join connections" obj=join id=56b7657847cd l=127.0.0.1:8080 r=140.82.115.243:31756
