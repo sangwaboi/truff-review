@@ -2,7 +2,7 @@
 
 > **Purpose**: This file is the shared knowledge base between **Antigravity (IDE agent)** and **Copilot CLI (terminal agent)**. Both agents read and update this file to stay synchronized. The human operator is **Vishvendra (sangwaboi)**.
 
-> **Last Updated**: 2026-04-13T07:00:00+05:30
+> **Last Updated**: 2026-04-13T07:15:00+05:30
 > **Updated By**: Copilot CLI
 
 ---
@@ -18,7 +18,8 @@
 | **Framework** | FastAPI |
 | **GCP Project** | `code-review-493116` |
 | **GCP Region** | `us-central1` |
-| **Service Account** | `universal-reviewer@code-review-493116.iam.gserviceaccount.com` |
+| **Service Account** | `universal-ai-reviewer-893@code-review-493116.iam.gserviceaccount.com` |
+| **Cloud Run URL** | `https://universal-ai-reviewer-944575899427.us-central1.run.app` |
 | **AI Model** | `gemini-3.1-pro` (Vertex AI) |
 
 ---
@@ -161,7 +162,7 @@ These are fetched at runtime via `app/secrets.py` using `google.cloud.secretmana
 - [x] ~~GitHub App installed on repo~~ — Confirmed (installation 123497984) ✅
 - [x] ~~E2E test~~ — Full pipeline working: webhook → auth → context → inference → response ✅
 - [x] ~~Vertex AI inference~~ — `gemini-2.5-flash` returns HTTP 200 with structured JSON ✅
-- [ ] Cloud Run deployment (ready to deploy — local validation PASSED)
+- [x] Cloud Run deployment — DEPLOYED at `https://universal-ai-reviewer-944575899427.us-central1.run.app` ✅
 
 ---
 
